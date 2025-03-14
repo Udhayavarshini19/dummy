@@ -1,4 +1,4 @@
-pipeline {
+/*pipeline {
     agent any
 
     environment {
@@ -49,6 +49,23 @@ pipeline {
         }
         failure {
             echo 'Some tests failed! Check reports for details.'
+        }
+    }
+}
+*/
+pipeline {
+    agent any
+    stages {
+        stage('Install Dependencies') {
+            steps {
+                bat 'npm install'
+                bat 'npx cypress install'
+            }
+        }
+        stage('Run Cypress Tests') {
+            steps {
+                bat 'npx cypress run'
+            }
         }
     }
 }
