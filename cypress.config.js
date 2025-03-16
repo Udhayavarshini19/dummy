@@ -1,24 +1,19 @@
 
-
-
 const { defineConfig } = require("cypress");
-
 module.exports = defineConfig({
   e2e: {
-    setupNodeEvents(on, config) {
-      // Implement node event listeners here
-    },
-    baseUrl: 'http://localhost:8080', // Set your application's base URL
-    retries: 2, // Retry failed tests up to 2 times
-    video: true, // Enable video recording
+    baseUrl: 'http://localhost:8080',  // Set your application's base URL
+    retries: 2,  // Retry failed tests up to 2 times
+    video: true, // Enable video recording for every test run (even on pass)
     screenshotOnRunFailure: true, // Capture screenshots on test failure
-    chromeWebSecurity: false, // Disable Chrome web security to prevent cross-origin issues
+    videoCompression: 32, // Optional: set video compression level (1 - best quality, 32 - worst quality)
+    videoUploadOnPasses: true, // Upload video even if tests pass
     defaultCommandTimeout: 10000, // Increase timeout for commands
-    env: {
-      loginUrl: '/login', // Example of setting environment variables
-    },
+    chromeWebSecurity: false, // Disable Chrome web security for cross-origin requests
     viewportWidth: 1280,
     viewportHeight: 720,
     specPattern: "cypress/e2e/**/*.cy.js", // Set the test file pattern
   },
 });
+
+

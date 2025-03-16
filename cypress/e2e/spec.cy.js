@@ -2,7 +2,7 @@ describe('xyz bank customer page', () => {
   beforeEach(()=>{
     cy.visit('https://www.globalsqa.com/angularJs-protractor/BankingProject/#/manager/list');
   })
-  it('validate customer existance', () => {
+  it('validate customer existence', () => {
     cy.get('table>tbody>tr').should('have.length.gt',0);
   })
   it('should fetch searched customer',()=>{
