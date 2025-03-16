@@ -30,8 +30,8 @@ pipeline {
             steps {
                 script {
                     // Archive test videos and screenshots for later access
-                    archiveArtifacts artifacts: 'cypress\videos\jenkinvideo', allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'cypress\screenshots\jenkinss', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'cypress/videos/jenkinvideo', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'cypress/screenshots/jenkinss', allowEmptyArchive: true
                     junit '**/test-results/*.xml' // Archive JUnit-style test results, if available
                 }
             }
