@@ -1,40 +1,48 @@
-
-
 pipeline {
     agent any
+
+    environment {
+        CYPRESS_CACHE_FOLDER = "${WORKSPACE}/.cache/Cypress"
+        CYPRESS_REPORTS = "cypress/reports"
+    }
+
     stages {
         stage('Install Dependencies') {
             steps {
-                bat 'npm install'
-                bat 'npx cypress install'
-            }
-        }
-        stage('Run Cypress Tests') {
-            steps {
-                bat 'npx cypress run'
-            }
-        }
-         stage('Merge Reports') {
-            steps {
-                bat 'npx mochawesome-merge cypress/reports/*.json -o cypress/reports/merged-report.json'
-                bat 'npx marge cypress/reports/merged-report.json -o cypress/reports'
+                script {
+                    if (fileExists('package-lock.json')) {
+                        sh 'npm ci'  // Faster installation if lockfile exists
+                    } else {
+                        sh 'npm install'
+                    }
+                }
             }
         }
 
-        stage('Publish HTML Report') {
+        stage('Run Cypress Tests') {
+            steps {
+                sh 'npx cypress run'
+            }
+        }
+
+        stage('Merge Reports') {
+            steps {
+                sh '''
+                npx mochawesome-merge ${CYPRESS_REPORTS}/json/*.json -o ${CYPRESS_REPORTS}/merged-report.json
+                npx marge ${CYPRESS_REPORTS}/merged-report.json -o ${CYPRESS_REPORTS}/html
+                '''
+            }
+        }
+
+        stage('Publish Cypress Report') {
             steps {
                 publishHTML([
-                    reportDir: 'cypress/reports',
+                    reportDir: "${CYPRESS_REPORTS}/html",
                     reportFiles: 'merged-report.html',
                     reportName: 'Cypress Test Report',
                     keepAll: true
                 ])
             }
+        }
     }
-}
-post{
-    success{
-        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'cypress/reports', reportFiles: 'merged-report.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-    }
-}
 }
