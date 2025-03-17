@@ -35,6 +35,7 @@ pipeline {
 post{
     success{
         publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'cypress/reports', reportFiles: 'merged-report.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-    }
+archiveArtifacts allowEmptyArchive: true, artifacts: 'cypress/reports/mochareports/report.html', followSymlinks: false   
+}
 }
 }
