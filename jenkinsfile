@@ -14,5 +14,21 @@ pipeline {
                 bat 'npx cypress run'
             }
         }
+         stage('Merge Reports') {
+            steps {
+                sh 'npx mochawesome-merge cypress/reports/*.json -o cypress/reports/merged-report.json'
+                sh 'npx marge cypress/reports/merged-report.json -o cypress/reports'
+            }
+        }
+
+        stage('Publish HTML Report') {
+            steps {
+                publishHTML([
+                    reportDir: 'cypress/reports',
+                    reportFiles: 'merged-report.html',
+                    reportName: 'Cypress Test Report',
+                    keepAll: true
+                ])
+            }
     }
 }
