@@ -16,8 +16,8 @@ pipeline {
         }
          stage('Merge Reports') {
             steps {
-                sh 'npx mochawesome-merge cypress/reports/*.json -o cypress/reports/merged-report.json'
-                sh 'npx marge cypress/reports/merged-report.json -o cypress/reports'
+                bat 'npx mochawesome-merge cypress/reports/*.json -o cypress/reports/merged-report.json'
+                bat 'npx marge cypress/reports/merged-report.json -o cypress/reports'
             }
         }
 
