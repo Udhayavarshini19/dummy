@@ -1,48 +1,40 @@
+
+
 pipeline {
     agent any
-
-    environment {
-        CYPRESS_CACHE_FOLDER = "${WORKSPACE}/.cache/Cypress"
-        CYPRESS_REPORTS = "cypress/reports"
-    }
-
     stages {
         stage('Install Dependencies') {
             steps {
-                script {
-                    if (fileExists('package-lock.json')) {
-                        sh 'npm ci'  // Faster installation if lockfile exists
-                    } else {
-                        sh 'npm install'
-                    }
-                }
+                bat 'npm install'
+                bat 'npx cypress install'
             }
         }
-
         stage('Run Cypress Tests') {
             steps {
-                sh 'npx cypress run'
+                bat 'npx cypress run'
             }
         }
-
-        stage('Merge Reports') {
+         stage('Merge Reports') {
             steps {
-                sh '''
-                npx mochawesome-merge ${CYPRESS_REPORTS}/json/*.json -o ${CYPRESS_REPORTS}/merged-report.json
-                npx marge ${CYPRESS_REPORTS}/merged-report.json -o ${CYPRESS_REPORTS}/html
-                '''
+                bat 'npx mochawesome-merge cypress/reports/*.json -o cypress/reports/merged-report.json'
+                bat 'npx marge cypress/reports/merged-report.json -o cypress/reports'
             }
         }
 
-        stage('Publish Cypress Report') {
+        stage('Publish HTML Report') {
             steps {
                 publishHTML([
-                    reportDir: "${CYPRESS_REPORTS}/html",
+                    reportDir: 'cypress/reports',
                     reportFiles: 'merged-report.html',
                     reportName: 'Cypress Test Report',
                     keepAll: true
                 ])
             }
-        }
     }
+}
+post{
+    success{
+        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'cypress/reports', reportFiles: 'merged-report.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+    }
+}
 }
