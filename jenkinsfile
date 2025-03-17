@@ -1,57 +1,4 @@
 
-pipeline {
-    agent any
-    environment {
-        CYPRESS_baseUrl = 'http://localhost:8080' // Set baseUrl for your application
-    }
-    triggers {
-        // Schedule the job to run every 30 minutes
-        cron('H/30 * * * *')
-    }
-    stages {
-        stage('Install Dependencies') {
-            steps {
-                script {
-                    // Install project dependencies and Cypress
-                    bat 'npm install'
-                    bat 'npx cypress install'
-                }
-            }
-        }
-        stage('Run Cypress Tests') {
-            steps {
-                script {
-                    // Run Cypress tests and specify the baseUrl from the environment variable
-                    bat 'npx cypress run --env baseUrl=${CYPRESS_baseUrl}'
-                }
-            }
-        }
-        stage('Post-Test Actions') {
-            steps {
-                script {
-                    // Archive test videos and screenshots for later access
-                    archiveArtifacts artifacts: 'cypress/videos/', allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'cypress/screenshots/', allowEmptyArchive: true
-                    junit '**/test-results/*.xml' // Archive JUnit-style test results, if available
-                }
-            }
-        }
-    }
-    post {
-        always {
-            // Clean up or notify after the test run
-            echo 'Cleaning up after tests...'
-        }
-        success {
-            echo 'Tests passed successfully!'
-        }
-        failure {
-            echo 'Tests failed. Check logs and artifacts for more details.'
-        }
-    }
-}
-
-/*
 
 pipeline {
     agent any
@@ -69,4 +16,3 @@ pipeline {
         }
     }
 }
-*/
