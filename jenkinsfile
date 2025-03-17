@@ -1,40 +1,62 @@
-
-
 pipeline {
     agent any
+
+    environment {
+        CYPRESS_CACHE_FOLDER = "$WORKSPACE/cache/Cypress"
+    }
+
     stages {
-        stage('Install Dependencies') {
+        stage('Checkout Code') {
             steps {
-                bat 'npm install'
-                bat 'npx cypress install'
-            }
-        }
-        stage('Run Cypress Tests') {
-            steps {
-                bat 'npx cypress run'
-            }
-        }
-         stage('Merge Reports') {
-            steps {
-                bat 'npx mochawesome-merge cypress/reports/*.json -o cypress/reports/merged-report.json'
-                bat 'npx marge cypress/reports/merged-report.json -o cypress/reports'
+                git 'https://github.com/Udhayavarshini19/dummy'  // Replace with your repo URL
             }
         }
 
-        stage('Publish HTML Report') {
+        stage('Install Dependencies') {
             steps {
-                publishHTML([
-                    reportDir: 'cypress/reports',
-                    reportFiles: 'merged-report.html',
-                    reportName: 'Cypress Test Report',
-                    keepAll: true
+                script {
+                    if (!fileExists('node_modules')) {
+                        sh 'npm install'
+                    }
+                }
+            }
+        }
+
+        stage('Run Cypress Tests') {
+            steps {
+                sh 'npx cypress run --headless'
+            }
+        }
+
+        stage('Merge Reports') {
+            steps {
+                sh 'npx mochawesome-merge cypress/reports/mocha/*.json > cypress/reports/mochareports/report.json'
+            }
+        }
+
+        stage('Generate HTML Report') {
+            steps {
+                sh 'npx marge cypress/reports/mochareports/report.json -f report -o cypress/reports/mochareports'
+            }
+        }
+
+        stage('Publish Report') {
+            steps {
+                publishHTML(target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: 'cypress/reports/mochareports',
+                    reportFiles: 'report.html',
+                    reportName: 'Cypress Test Report'
                 ])
             }
+        }
     }
-}
-post{
-    success{
-        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'cypress/reports', reportFiles: 'merged-report.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'cypress/reports/mochareports/**', fingerprint: true
+        }
     }
-}
 }
